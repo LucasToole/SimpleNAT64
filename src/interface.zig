@@ -18,14 +18,33 @@ fn linuxIface() !void {
     defer arena.deinit();
     const alloc = &arena.allocator;
     std.debug.print("Configuring Linux interfaces.\n", .{});
-    // Temp test code, learning how Zig works
-    const tee: []const u8 = "-al";
-    var i: u8 = 0;
-    while (i < 1) : (i += 1) {
-        const child = try std.ChildProcess.init(&[_][]const u8{ "ls", tee }, alloc);
-        _ = try child.spawnAndWait();
-        child.deinit();
+    // Temp test code
+    const iface_name: []const u8 = "tap1"; //temp
+    const iface_ip4: []const u8 = "10.0.0.12"; //temp
+    const iface_ip6: []const u8 = "fd00:42c6:3eb2::a"; //temp
+
+    const tap_clear = try std.ChildProcess.init(&[_][]const u8{ "ip", "link", "delete", iface_name }, alloc);
+    const tap_setup = try std.ChildProcess.init(&[_][]const u8{ "ip", "tuntap", "add", iface_name, "mode", "tap" }, alloc);
+    const tap_up = try std.ChildProcess.init(&[_][]const u8{ "ip", "link", "set", "dev", iface_name, "up" }, alloc);
+    const tap_ip4 = try std.ChildProcess.init(&[_][]const u8{ "ip", "a", "add", iface_ip4, "dev", iface_name }, alloc);
+    const tap_ip6 = try std.ChildProcess.init(&[_][]const u8{ "ip", "-6", "a", "add", iface_ip6, "dev", iface_name }, alloc);
+
+    defer tap_clear.deinit();
+    defer tap_setup.deinit();
+    defer tap_up.deinit();
+    defer tap_ip4.deinit();
+    defer tap_ip6.deinit();
+
+    // TODO: Handle more errors
+    _ = try tap_clear.spawnAndWait();
+    const setup_term = try tap_setup.spawnAndWait();
+    if (setup_term.Exited == 1) {
+        std.debug.print("Error: Program needs to runs commands that require SuperUser access\n", .{});
+        std.process.exit(1);
     }
+    _ = try tap_up.spawnAndWait();
+    _ = try tap_ip4.spawnAndWait();
+    _ = try tap_ip6.spawnAndWait();
 }
 
 fn freebsdIface() !void {

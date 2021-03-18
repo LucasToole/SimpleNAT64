@@ -28,12 +28,14 @@ fn linuxIface() !void {
     const tap_up = try std.ChildProcess.init(&[_][]const u8{ "ip", "link", "set", "dev", iface_name, "up" }, alloc);
     const tap_ip4 = try std.ChildProcess.init(&[_][]const u8{ "ip", "a", "add", iface_ip4, "dev", iface_name }, alloc);
     const tap_ip6 = try std.ChildProcess.init(&[_][]const u8{ "ip", "-6", "a", "add", iface_ip6, "dev", iface_name }, alloc);
+    const tap_route = try std.ChildProcess.init(&[_][]const u8{ "ip", "-6", "route", "add", "64:ff9b::/96", "dev", iface_name }, alloc);
 
     defer tap_clear.deinit();
     defer tap_setup.deinit();
     defer tap_up.deinit();
     defer tap_ip4.deinit();
     defer tap_ip6.deinit();
+    defer tap_route.deinit();
 
     // TODO: Handle more errors
     _ = try tap_clear.spawnAndWait();
@@ -45,12 +47,15 @@ fn linuxIface() !void {
     _ = try tap_up.spawnAndWait();
     _ = try tap_ip4.spawnAndWait();
     _ = try tap_ip6.spawnAndWait();
+    _ = try tap_route.spawnAndWait();
 }
 
 fn freebsdIface() !void {
-    std.debug.print("Configuring FreeBSD interfaces.\n", .{});
+    //std.debug.print("Configuring FreeBSD interfaces.\n", .{});
+    std.debug.print("FreeBSD support is planned but not implemented yet\n", .{});
 }
 
 fn netbsdIface() !void {
-    std.debug.print("Configuring NetBSD interfaces.\n", .{});
+    //std.debug.print("Configuring NetBSD interfaces.\n", .{});
+    std.debug.print("NetBSD support is planned but not implemented yet\n", .{});
 }

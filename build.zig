@@ -12,6 +12,12 @@ pub fn build(b: *Builder) void {
     const mode = b.standardReleaseOptions();
 
     const exe = b.addExecutable("nat64", "src/main.zig");
+    exe.linkLibC();
+    exe.addCSourceFile("src/cFunctions.c", &[_][]const u8{
+        "-Wall",
+        "-Wextra",
+    });
+    exe.addIncludeDir("src");
     exe.setTarget(target);
     exe.setBuildMode(mode);
     exe.setOutputDir("build");

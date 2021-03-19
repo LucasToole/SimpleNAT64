@@ -59,3 +59,12 @@ fn netbsdIface() !void {
     //std.debug.print("Configuring NetBSD interfaces.\n", .{});
     std.debug.print("NetBSD support is planned but not implemented yet\n", .{});
 }
+
+pub fn openInterface() !void {
+    std.debug.print("Opening Interface...\n", .{});
+
+    const c = @cImport({
+        @cInclude("cFunctions.h");
+    });
+    c.openiface();
+}

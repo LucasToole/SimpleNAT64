@@ -3,6 +3,6 @@
 #ifndef CFUNCTIONS_H
 #define CFUNCTIONS_H
 
-int get_iface_fd();
+int get_iface_fd(int);
 
 #endif /* CFUNCTIONS_H */

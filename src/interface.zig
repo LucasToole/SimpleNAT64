@@ -4,6 +4,8 @@
 const builtin = @import("builtin");
 const std = @import("std");
 
+const EXIT_FAILURE = 1;
+
 pub fn initIface() !void {
     try switch (builtin.os.tag) {
         .linux => linuxIface(),
@@ -42,7 +44,7 @@ fn linuxIface() !void {
     const setup_term = try tap_setup.spawnAndWait();
     if (setup_term.Exited == 1) {
         std.debug.print("Error: Program needs to runs commands that require SuperUser access\n", .{});
-        std.process.exit(1);
+        std.process.exit(EXIT_FAILURE);
     }
     _ = try tap_up.spawnAndWait();
     _ = try tap_ip4.spawnAndWait();
@@ -66,12 +68,15 @@ pub fn openInterface() !void {
     const c = @cImport({
         @cInclude("cFunctions.h");
     });
-    var iface_fd: std.fs.File = undefined;
-    iface_fd.handle = c.get_iface_fd();
-    if (iface_fd.handle < 0) {
+
+    const iface_fd = try std.fs.openFileAbsoluteZ("/dev/net/tun", std.fs.File.OpenFlags{
+        .read = true,
+        .write = true,
+    });
+    if (c.get_iface_fd(iface_fd.handle) < 0) { // TODO: Use Zig error handling
         std.debug.print("Failed to attach to interface\n", .{});
         iface_fd.close();
-        std.process.exit(1);
+        std.process.exit(EXIT_FAILURE);
     }
 
     std.debug.print("{}\n", .{iface_fd.handle});

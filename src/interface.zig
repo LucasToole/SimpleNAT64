@@ -61,10 +61,18 @@ fn netbsdIface() !void {
 }
 
 pub fn openInterface() !void {
-    std.debug.print("Opening Interface...\n", .{});
+    std.debug.print("Attaching to Interface...\n", .{});
 
     const c = @cImport({
         @cInclude("cFunctions.h");
     });
-    c.openiface();
+    var iface_fd: std.fs.File = undefined;
+    iface_fd.handle = c.get_iface_fd();
+    if (iface_fd.handle < 0) {
+        std.debug.print("Failed to attach to interface\n", .{});
+        iface_fd.close();
+        std.process.exit(1);
+    }
+
+    std.debug.print("{}\n", .{iface_fd.handle});
 }

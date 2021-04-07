@@ -81,3 +81,27 @@ pub fn openInterface() !void {
 
     std.debug.print("{}\n", .{iface_fd.handle});
 }
+
+pub fn zigOpenInterface() !void {
+    const c = @cImport({
+        @cInclude("sys/ioctl.h");
+        @cInclude("net/if.h");
+        @cInclude("linux/if_tun.h");
+        @cInclude("fcntl.h");
+        @cInclude("unistd.h");
+    });
+
+    const iface_fd = try std.fs.openFileAbsoluteZ("/dev/net/tun", std.fs.File.OpenFlags{
+        .read = true,
+        .write = true,
+    });
+
+    errdefer iface_fd.close();
+
+    const if_name = "tap1"; // TEMP
+    var iface: c.ifreq = std.mem.zeroes(c.ifreq); // TODO: Make this work lol, Zig doesn't see the members of the struct because they are members of a union within the struct.
+    iface.ifr_name = if_name;
+    iface.ifr_flags = c.IFF_NO_PI | c.IFF_TAP;
+
+    try c.ioctl(iface_fd, c.TUNSETIFF, @ptrCast(*void, &iface));
+}

@@ -7,5 +7,6 @@ pub fn main() anyerror!void {
     std.debug.print("Starting...\n", .{});
 
     try iface.initIface();
-    try iface.openInterface();
+    //try iface.openInterface();
+    try iface.zigOpenInterface();
 }
